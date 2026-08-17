@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fitness & Weight Prediction App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="hero">
+            <p class="eyebrow">CSCI4070 Machine Learning Project</p>
+            <h1>Fitness & Weight Prediction App</h1>
+            <p class="subtitle">Upload a fitness CSV file, choose predictors and a target, train an ML model, then test the model with your own input values.</p>
+        </header>
+
+        {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+
+        <section class="card">
+            <div class="section-title">
+                <span class="step-badge">1</span>
+                <div>
+                    <h2>Upload CSV Dataset</h2>
+                    <p>The app automatically detects columns and adds BMI/weight category if height and weight columns are present.</p>
+                </div>
+            </div>
+            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="csv_file" accept=".csv">
+                <button type="submit">Upload Dataset</button>
+            </form>
+        </section>
+
+        {% if columns %}
+        <section class="card">
+            <div class="section-title">
+                <span class="step-badge">2</span>
+                <div>
+                    <h2>Select Model Options</h2>
+                    <p>Use Linear Regression for final weight or BMI. Use Logistic Regression for weight_category.</p>
+                </div>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="train">
+                <label class="field-label">Choose Algorithm</label>
+                <select name="algorithm">
+                    <option value="Linear Regression">Linear Regression - predicts a number</option>
+                    <option value="Logistic Regression">Logistic Regression - predicts a category</option>
+                    <option value="Decision Tree">Decision Tree - number or category</option>
+                </select>
+
+                <h3>Select Predictor Variables</h3>
+                <p class="hint">Good predictors: age, height_cm, current_weight_kg, daily_calories, workout_days_per_week, workout_minutes_per_day, sleep_hours, water_liters, goal_days.</p>
+                <div class="columns-box">
+                    {% for col in columns %}
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="predictors" value="{{ col }}" {% if col in selected_predictors %}checked{% endif %}> {{ col }}
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <h3>Select Target Variable</h3>
+                <p class="hint">For regression choose final_weight_kg or bmi. For classification choose weight_category.</p>
+                <select name="target">
+                    {% for col in columns %}
+                        <option value="{{ col }}">{{ col }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="primary-button">Train Model</button>
+            </form>
+        </section>
+        {% endif %}
+
+        {% if results %}
+        <section class="card results">
+            <div class="section-title">
+                <span class="step-badge">3</span>
+                <div>
+                    <h2>Model Results</h2>
+                    <p>These values come from a 70% training and 30% testing split.</p>
+                </div>
+            </div>
+            <div class="metric-grid">
+                <div class="metric-card"><span>Model</span><strong>{{ results.model }}</strong></div>
+                <div class="metric-card"><span>Metric 1</span><strong>{{ results.metric_1 }}</strong></div>
+                <div class="metric-card"><span>Metric 2</span><strong>{{ results.metric_2 }}</strong></div>
+                <div class="metric-card"><span>Metric 3</span><strong>{{ results.metric_3 }}</strong></div>
+            </div>
+            <div class="prediction-box">{{ results.prediction_example }}</div>
+        </section>
+        {% endif %}
+
+        {% if trained_predictors %}
+        <section class="card input-card">
+            <div class="section-title">
+                <span class="step-badge">4</span>
+                <div>
+                    <h2>Try Your Own Prediction</h2>
+                    <p>Enter values for the same predictors used to train the model.</p>
+                </div>
+            </div>
+            <form method="POST" class="input-grid-form">
+                <input type="hidden" name="action" value="predict">
+                <div class="input-grid">
+                    {% for col in trained_predictors %}
+                    <label>{{ col }}
+                        <input type="number" step="any" name="input_{{ col }}" placeholder="Enter {{ col }}" required>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="primary-button">Predict Outcome</button>
+            </form>
+            {% if input_prediction %}<div class="prediction-box success">{{ input_prediction }}</div>{% endif %}
+        </section>
+        {% endif %}
+
+        {% if plot_paths %}
+        <section class="card">
+            <h2>Visualizations</h2>
+            <p class="hint">The app creates a histogram, box plot for numeric targets, and a scatter plot using the first numeric predictor.</p>
+            <div class="plot-grid">
+                {% for plot in plot_paths %}<img src="{{ plot }}" alt="Model visualization">{% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if stats %}
+        <section class="card">
+            <h2>Descriptive Statistics</h2>
+            <p class="hint">This summary helps explain the dataset in your report and presentation.</p>
+            <div class="table-container">{{ stats | safe }}</div>
+        </section>
+        {% endif %}
+    </div>
+</body>
+</html>
