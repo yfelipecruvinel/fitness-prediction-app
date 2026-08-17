@@ -1,6 +1,16 @@
 # Fitness & Weight Prediction App
 
+This project was developed as a group assignment for my Introduction to Artificial Intelligence course.
+
 This Flask web application allows users to upload a CSV fitness dataset, select predictors and a target variable, choose an ML algorithm, train a model using a 70/30 train-test split, and view results.
+
+
+## Project Report
+
+The full project report is available here:
+
+[View Project Report](report/CSCI4070%20Final%20Report.pdf)
+
 
 ## How to Run
 
